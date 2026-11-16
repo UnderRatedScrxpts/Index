@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Nexus Hub</title>
+    <link rel="icon" type="image/png" sizes="512x512" href="https://upload.wikimedia.org/wikipedia/commons/7/70/Roblox_Corporation_2025_logo.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.55);
+            --glass-bg-hover: rgba(255, 255, 255, 0.78);
+            --glass-border: rgba(255, 255, 255, 0.85);
+            --glass-inner: inset 0 1px 0 rgba(255, 255, 255, 0.95);
+            --glass-shadow: 0 12px 36px rgba(80, 120, 200, 0.16);
+            --ink: #0f172a;
+            --ink-soft: #334155;
+            --ink-muted: #64748b;
+            --accent: #00b06f;
+            --star: #eab308;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body {
+            background: linear-gradient(135deg, rgba(240, 249, 255, 0.45) 0%, rgba(224, 242, 254, 0.5) 50%, rgba(243, 232, 255, 0.55) 100%),
+                        url('https://cdn.phototourl.com/anon/2026-11-16-e6b748db-92de-414d-8266-593f9f63d7bb.jpg') center/cover fixed no-repeat;
+            background-attachment: fixed, fixed;
+            color: var(--ink);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+        a { color: inherit; text-decoration: none; }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(26px) saturate(200%);
+            -webkit-backdrop-filter: blur(26px) saturate(200%);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-inner), var(--glass-shadow);
+            border-radius: 20px;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(24px) saturate(200%);
+            -webkit-backdrop-filter: blur(24px) saturate(200%);
+            border-bottom: 1px solid var(--glass-border);
+            height: 64px; padding: 0 24px; display: flex; align-items: center;
+            justify-content: space-between; gap: 16px; position: sticky; top: 0; z-index: 100;
+            box-shadow: var(--glass-inner), 0 4px 20px rgba(80, 120, 200, 0.08);
+        }
+        .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.15rem; color: var(--ink); }
+        .logo img { width: 34px; height: 34px; border-radius: 10px; padding: 4px; background: #fff; border: 1px solid var(--glass-border); box-shadow: 0 2px 8px rgba(80, 120, 200, 0.15); }
+        .search { flex-grow: 1; max-width: 360px; position: relative; }
+        .search input {
+            width: 100%; background: rgba(255, 255, 255, 0.7); border: 1px solid var(--glass-border);
+            border-radius: 12px; padding: 9px 16px 9px 38px; font-size: 0.85rem; color: var(--ink); outline: none;
+            box-shadow: var(--glass-inner); transition: all 0.2s ease;
+        }
+        .search input::placeholder { color: var(--ink-muted); }
+        .search input:focus { border-color: rgba(0, 176, 111, 0.5); background: rgba(255, 255, 255, 0.92); box-shadow: 0 0 0 3px rgba(0, 176, 111, 0.15); }
+        .search i { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--ink-muted); font-size: 13px; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 28px 20px 60px; }
+        .portal-header { margin-bottom: 24px; padding: 0 4px; }
+        .portal-header h1 { font-size: 1.65rem; font-weight: 800; margin-bottom: 4px; color: var(--ink); letter-spacing: -0.02em; }
+        .portal-header p { font-size: 0.9rem; color: var(--ink-soft); }
+
+        .games-grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+        @media (min-width: 560px) { .games-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 900px) { .games-grid { grid-template-columns: repeat(3, 1fr); } }
+
+        .tile {
+            background: var(--glass-bg);
+            backdrop-filter: blur(22px) saturate(190%);
+            -webkit-backdrop-filter: blur(22px) saturate(190%);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; cursor: pointer;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+            box-shadow: var(--glass-inner), var(--glass-shadow);
+        }
+        .tile:hover { transform: translateY(-4px); background: var(--glass-bg-hover); box-shadow: var(--glass-inner), 0 18px 44px rgba(80, 120, 200, 0.24); }
+        .tile-img { aspect-ratio: 16/10; background: rgba(255, 255, 255, 0.4); position: relative; overflow: hidden; }
+        .tile-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+        .tile:hover .tile-img img { transform: scale(1.05); }
+        
+        .server-ping {
+            position: absolute; bottom: 10px; right: 10px; background: rgba(255, 255, 255, 0.85);
+            border: 1px solid #fff; color: #059669; font-size: 11px; font-weight: 700;
+            padding: 3px 8px; border-radius: 8px; backdrop-filter: blur(8px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .tile-body { padding: 16px; display: flex; flex-direction: column; flex-grow: 1; }
+        .tile-title { font-weight: 800; font-size: 1.02rem; margin-bottom: 4px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tile-desc { font-size: 0.8rem; color: var(--ink-soft); margin-bottom: 12px; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .tile-stats { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--ink-soft); font-weight: 600; margin-bottom: 14px; }
+        .play-btn {
+            width: 100%; background: linear-gradient(180deg, #22c55e 0%, #00b06f 100%);
+            color: #fff; font-weight: 700; padding: 10px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: auto;
+            transition: opacity 0.2s ease, transform 0.1s ease; box-shadow: 0 4px 14px rgba(0, 176, 111, 0.35);
+        }
+        .play-btn:hover { opacity: 0.92; }
+        .play-btn:active { transform: scale(0.98); }
+
+        .browser-modal-overlay { position: fixed; inset: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.45); z-index: 99999; display: none; align-items: center; justify-content: center; padding: 0; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .browser-modal-overlay.active { display: flex; animation: fadeIn 0.25s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+        
+        .chrome-window { width: 100%; max-width: 1100px; height: 100vh; height: 100dvh; background: #ffffff; border-radius: 0; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        .chrome-titlebar { background: #dee1e6; height: 38px; display: flex; align-items: center; justify-content: space-between; padding: 0 4px; flex-shrink: 0; }
+        .chrome-tabs { display: flex; height: 32px; margin-top: 6px; gap: 0; overflow-x: auto; max-width: 75%; }
+        .chrome-tab { background: #ffffff; border-radius: 8px 8px 0 0; padding: 0 10px; min-width: 130px; max-width: 200px; display: flex; align-items: center; position: relative; box-shadow: 0 -1px 2px rgba(0,0,0,0.05); }
+        .chrome-tab-icon { width: 14px; height: 14px; margin-right: 6px; flex-shrink: 0; }
+        .chrome-tab-title { font-size: 11px; color: #333; flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 4px; font-weight: 500; }
+        .chrome-tab-close { font-size: 13px; color: #5f6368; cursor: pointer; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; line-height: 1; flex-shrink: 0; }
+        .chrome-tab-close:hover { background: #e81123; color: white; }
+        
+        .chrome-window-controls { display: flex; height: 38px; align-items: center; }
+        .chrome-window-controls span { width: 36px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #333; cursor: pointer; }
+        .chrome-window-controls .chrome-close-btn:hover { background: #e81123; color: white; }
+        
+        .chrome-toolbar { background: #ffffff; height: 42px; display: flex; align-items: center; padding: 0 10px; border-bottom: 1px solid #dadce0; flex-shrink: 0; gap: 8px; }
+        .chrome-nav-btns { display: flex; gap: 4px; color: #5f6368; }
+        .chrome-icon { width: 26px; height: 26px; padding: 4px; border-radius: 50%; fill: #5f6368; cursor: pointer; box-sizing: border-box; }
+        
+        .chrome-address-bar { flex-grow: 1; background: #f1f3f4; height: 30px; border-radius: 15px; display: flex; align-items: center; padding: 0 12px; gap: 6px; min-width: 0; }
+        .chrome-lock { width: 12px; height: 12px; fill: #5f6368; flex-shrink: 0; }
+        .chrome-url { font-size: 12px; color: #202124; flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .chrome-url-dim { color: #5f6368; }
+        
+        .browser-content { flex-grow: 1; background: #fff; display: flex; flex-direction: column; min-height: 0; }
+        .browser-content iframe { flex-grow: 1; width: 100%; height: 100%; border: none; display: block; }
+
+        @media(min-width: 768px) {
+            .chrome-window { border-radius: 12px; height: 85vh; width: 95vw; }
+            .browser-modal-overlay { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/7/70/Roblox_Corporation_2025_logo.svg" alt="logo">
+            <span>Nexus Hub</span>
+        </div>
+        <div class="search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="searchInput" placeholder="Search servers..." oninput="renderGames()">
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="portal-header">
+            <h1>Live Servers</h1>
+            <p>Pick a server below and jump straight in.</p>
+        </div>
+        <div class="games-grid" id="gamesGrid"></div>
+    </main>
+
+    <div id="browserModal" class="browser-modal-overlay">
+        <div class="chrome-window">
+            <div class="chrome-titlebar">
+                <div class="chrome-tabs">
+                    <div class="chrome-tab active">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/7/70/Roblox_Corporation_2025_logo.svg" class="chrome-tab-icon" id="modalTabIcon" alt="Logo">
+                        <span class="chrome-tab-title" id="modalTabTitle">Roblox</span>
+                        <span class="chrome-tab-close" id="closeTabBtn">&times;</span>
+                    </div>
+                </div>
+                <div class="chrome-window-controls">
+                    <span style="display:none">&#8211;</span>
+                    <span style="display:none">&#9744;</span>
+                    <span class="chrome-close-btn" id="closeBrowserBtn">&#10005;</span>
+                </div>
+            </div>
+            <div class="chrome-toolbar">
+                <div class="chrome-nav-btns">
+                    <svg viewBox="0 0 24 24" class="chrome-icon"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"></path></svg>
+                    <svg viewBox="0 0 24 24" class="chrome-icon"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"></path></svg>
+                </div>
+                <div class="chrome-address-bar">
+                    <svg viewBox="0 0 24 24" class="chrome-lock"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"></path></svg>
+                    <span class="chrome-url" id="fakeUrlText"><span class="chrome-url-dim">https://</span>roblox.com/...</span>
+                </div>
+            </div>
+            <div class="browser-content">
+                <iframe id="browserIframe" src="about:blank"></iframe>
+            </div>
+        </div>
+    </div>
+        <script>
+        const games = [
+            {
+                title: "Late Night Condo",
+                desc: "2 floor condo w/ working radio, morphs, and private rooms. vc enabled.",
+                currentPlayers: 18,
+                maxPlayers: 20,
+                rating: 4.9,
+                ping: 14,
+                img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80",
+                realUrl: "https://www.roblox.rw/games/95206881/Baseplate?privateServerLinkCode=26065913844785075427592831388890",
+                fakeUrl: "www.roblox.com/games/95206881/Baseplate?privateServerLinkCode=26065913844785075427592831388890"
+            },
+            {
+                title: "Vibe Penthouse",
+                desc: "city view penthouse, pool upstairs, lockable doors & custom animations.",
+                currentPlayers: 14,
+                maxPlayers: 20,
+                rating: 4.7,
+                ping: 22,
+                img: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&w=600&q=80",
+                realUrl: "https://www.roblox.rw/games/82205993156224/Walk-10000-Stairs-for-Neko-Girl?privateServerLinkCode=56987585516370817668187404461166",
+                fakeUrl: "www.roblox.com/games/82205993156224/Walk-10000-Stairs-for-Neko-Girl?privateServerLinkCode=56987585516370817668187404461166"
+            },
+            {
+                title: "Neko Cafe",
+                desc: "chill hangout spot, working kitchen, back rooms + avatar editor.",
+                currentPlayers: 15,
+                maxPlayers: 20,
+                rating: 4.8,
+                ping: 19,
+                img: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&w=600&q=80",
+                realUrl: "https://www.roblox.rw/games/135402310967020/Talk-to-AI-Mimi?privateServerLinkCode=360470997816881377827886421535",
+                fakeUrl: "www.roblox.com/games/135402310967020/Talk-to-AI-Mimi?privateServerLinkCode=360470997816881377827886421535"
+            },
+            {
+                title: "Private Apartment",
+                desc: "small modern condo, r6/r15 supported, admin commands for vip.",
+                currentPlayers: 20,
+                maxPlayers: 20,
+                rating: 5.0,
+                ping: 11,
+                img: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&w=600&q=80",
+                realUrl: "https://www.roblox.rw/games/14153443454/Meet-a-neko?privateServerLinkCode=56987585516370817668187404461166",
+                fakeUrl: "www.roblox.com/games/14153443454/Meet-a-neko?privateServerLinkCode=56987585516370817668187404461166"
+            },
+            {
+                title: "Sunset Rooftop",
+                desc: "rooftop lounge with hot tub, custom poses, and music player.",
+                currentPlayers: 9,
+                maxPlayers: 20,
+                rating: 4.6,
+                ping: 28,
+                img: "https://images.unsplash.com/photo-1618172193622-ae2d025f4032?auto=format&fit=crop&w=600&q=80",
+                realUrl: "https://www.roblox.rw/games/99683982727100/Headpats-From-Catgirls-3?privateServerLinkCode=360470997816881377827886421535",
+                fakeUrl: "www.roblox.com/games/99683982727100/Headpats-From-Catgirls-3?privateServerLinkCode=360470997816881377827886421535"
+            },
+            {
+                title: "Midnight Club",
+                desc: "club & upstairs suites, bypass audio ids working, active server.",
+                currentPlayers: 17,
+                maxPlayers: 20,
+                rating: 4.9,
+                ping: 16,
+                img: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&q=80",
+                realUrl: "https://www.roblox.rw/games/139691978713085/Obsessed?privateServerLinkCode=56987585516370817668187404461166",
+                fakeUrl: "www.roblox.com/games/139691978713085/Obsessed?privateServerLinkCode=56987585516370817668187404461166"
+            }
+        ];
+
+        const grid = document.getElementById('gamesGrid');
+        const searchInput = document.getElementById('searchInput');
+        
+        function renderGames() {
+            const query = searchInput.value.toLowerCase();
+            const filtered = games.filter(g => g.title.toLowerCase().includes(query) || g.desc.toLowerCase().includes(query));
+            
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 40px; color: var(--ink-muted);">No matching servers found.</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map((g) => {
+                const originalIndex = games.indexOf(g);
+                return `
+                    <div class="tile" onclick="launchGame(${originalIndex})">
+                        <div class="tile-img">
+                            <img src="${g.img}" alt="${g.title}">
+                            <div class="server-ping"><i class="fa-solid fa-wifi" style="font-size:9px;"></i> <span id="ping-${originalIndex}">${g.ping}ms</span></div>
+                        </div>
+                        <div class="tile-body">
+                            <div class="tile-title">${g.title}</div>
+                            <div class="tile-desc">${g.desc}</div>
+                            <div class="tile-stats">
+                                <span style="color:var(--star); font-weight:700;">⭐ <span id="rating-${originalIndex}">${g.rating.toFixed(1)}</span></span>
+                                <span><i class="fa-solid fa-user" style="font-size:10px;"></i> <span id="players-${originalIndex}">${g.currentPlayers}</span>/${g.maxPlayers}</span>
+                            </div>
+                            <button class="play-btn"><i class="fa-solid fa-play"></i> Join Game</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        setInterval(() => {
+            games.forEach((g, index) => {
+                const playerDelta = Math.floor(Math.random() * 3) - 1;
+                g.currentPlayers += playerDelta;
+                if (g.currentPlayers < 3) g.currentPlayers = 3;
+                if (g.currentPlayers > g.maxPlayers) g.currentPlayers = g.maxPlayers;
+
+                const pingDelta = Math.floor(Math.random() * 5) - 2;
+                g.ping += pingDelta;
+                if (g.ping < 8) g.ping = 8;
+                if (g.ping > 45) g.ping = 45;
+
+                if (Math.random() < 0.2) {
+                    const ratingDelta = (Math.random() * 0.2) - 0.1;
+                    g.rating += ratingDelta;
+                    if (g.rating < 4.2) g.rating = 4.2;
+                    if (g.rating > 5.0) g.rating = 5.0;
+                }
+
+                const playerEl = document.getElementById(`players-${index}`);
+                const pingEl = document.getElementById(`ping-${index}`);
+                const ratingEl = document.getElementById(`rating-${index}`);
+
+                if (playerEl) playerEl.innerText = g.currentPlayers;
+                if (pingEl) pingEl.innerText = `${g.ping}ms`;
+                if (ratingEl) ratingEl.innerText = g.rating.toFixed(1);
+            });
+        }, 3000);
+
+        function launchGame(index) {
+            const game = games[index];
+            const modal = document.getElementById('browserModal');
+            const iframe = document.getElementById('browserIframe');
+            const fakeUrlText = document.getElementById('fakeUrlText');
+            const tabTitle = document.getElementById('modalTabTitle');
+
+            iframe.src = game.realUrl;
+            tabTitle.innerText = game.title;
+            const parsedDisplay = game.fakeUrl.replace(/^https?:\/\//, '');
+            fakeUrlText.innerHTML = `<span class="chrome-url-dim">https://</span>${parsedDisplay}`;
+            
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeChromeModal() {
+            const modal = document.getElementById('browserModal');
+            const iframe = document.getElementById('browserIframe');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            iframe.src = 'about:blank';
+        }
+
+        document.getElementById('closeBrowserBtn').addEventListener('click', closeChromeModal);
+        document.getElementById('closeTabBtn').addEventListener('click', closeChromeModal);
+        document.getElementById('browserModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('browserModal')) {
+                closeChromeModal();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('browserModal').classList.contains('active')) {
+                closeChromeModal();
+            }
+        });
+
+        renderGames();
+    </script>
+</body>
+</html>
